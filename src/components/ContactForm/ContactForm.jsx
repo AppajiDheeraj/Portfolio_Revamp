@@ -35,10 +35,19 @@ const ContactForm = () => {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      const rawBody = await response.text();
+      let result = {};
+
+      if (rawBody) {
+        try {
+          result = JSON.parse(rawBody);
+        } catch {
+          result = {};
+        }
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || "Unable to send message right now.");
+        throw new Error(result.error || `Request failed with status ${response.status}.`);
       }
 
       setSubmitMessage("Thanks! Your message has been sent.");
