@@ -1,6 +1,4 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/" }
-  ]
+  "outputDirectory": "build",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
