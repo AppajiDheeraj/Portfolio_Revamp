@@ -15,15 +15,6 @@ const sanitize = (value = "") => value.toString().trim();
 
 const IMAGE_PATH_REGEX = /images\/([a-zA-Z0-9._-]+)/g;
 
-const MIME_BY_EXTENSION = {
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".gif": "image/gif",
-  ".webp": "image/webp",
-  ".svg": "image/svg+xml",
-};
-
 const sendWithResend = async (apiKey, payload) => {
   return fetch("https://api.resend.com/emails", {
     method: "POST",
@@ -55,6 +46,36 @@ const getThankYouText = async (name) => {
   }
 };
 
+const getFormResponseText = async ({ name, email, message }) => {
+  const fallback = [
+    "New portfolio form response",
+    "",
+    `Name: ${name}`,
+    `Email: ${email}`,
+    "",
+    "Message:",
+    message,
+  ].join("\n");
+
+  try {
+    const templatePath = path.resolve(__dirname, "../form_response/email.txt");
+    const template = await readFile(templatePath, "utf8");
+
+    return [
+      template.trim(),
+      "",
+      "Form Details:",
+      `Name: ${name}`,
+      `Email: ${email}`,
+      "",
+      "Message:",
+      message,
+    ].join("\n");
+  } catch {
+    return fallback;
+  }
+};
+
 const textToFallbackHtml = (text) => {
   const escaped = text
     .replace(/&/g, "&amp;")
@@ -64,8 +85,16 @@ const textToFallbackHtml = (text) => {
   return `<div style="font-family:Arial,Helvetica,sans-serif;line-height:1.6;white-space:pre-wrap;color:#1c1c1c">${escaped}</div>`;
 };
 
+const escapeHtml = (value = "") =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+
 const enforceLightThemeHint = (html) => {
-  if (html.includes("name=\"color-scheme\"")) {
+  if (html.includes('name="color-scheme"') || html.includes("name='color-scheme'")) {
     return html;
   }
 
@@ -76,40 +105,59 @@ const enforceLightThemeHint = (html) => {
     return html.replace("</head>", `${lightHints}</head>`);
   }
 
-  return html;
+  return `${lightHints}${html}`;
 };
 
-const inlineLocalTemplateImages = async (html) => {
-  const matches = html.match(IMAGE_PATH_REGEX) || [];
-  const uniquePaths = [...new Set(matches)];
-  let inlinedHtml = html;
-
-  for (const relativePath of uniquePaths) {
-    const fileName = relativePath.replace("images/", "");
-    const imagePath = path.resolve(__dirname, "../email/images", fileName);
-    const extension = path.extname(fileName).toLowerCase();
-    const mimeType = MIME_BY_EXTENSION[extension] || "application/octet-stream";
-
-    try {
-      const imageBuffer = await readFile(imagePath);
-      const dataUrl = `data:${mimeType};base64,${imageBuffer.toString("base64")}`;
-      inlinedHtml = inlinedHtml.split(relativePath).join(dataUrl);
-    } catch {
-      // Keep original URL if a template image is missing.
-    }
-  }
-
-  return inlinedHtml;
+const normalizeAssetBaseUrl = (value) => {
+  const fallback = "https://portfolio-seven-ruby-98.vercel.app/email/images";
+  const url = sanitize(value || fallback);
+  return url.replace(/\/+$/, "");
 };
 
-const getThankYouHtml = async (name) => {
+const normalizeFormResponseAssetBaseUrl = (value) => {
+  const fallback = "https://portfolio-seven-ruby-98.vercel.app/form_response/images";
+  const url = sanitize(value || fallback);
+  return url.replace(/\/+$/, "");
+};
+
+const replaceTemplateImagePaths = (html, baseUrl) => {
+  return html.replace(IMAGE_PATH_REGEX, (_, fileName) => `${baseUrl}/${fileName}`);
+};
+
+const getThankYouHtml = async (name, assetBaseUrl) => {
   const fallbackText = await getThankYouText(name);
 
   try {
     const templatePath = path.resolve(__dirname, "../email/email.html");
     const template = await readFile(templatePath, "utf8");
-    const inlinedTemplate = await inlineLocalTemplateImages(template);
-    return enforceLightThemeHint(inlinedTemplate);
+    const withAbsoluteAssets = replaceTemplateImagePaths(template, assetBaseUrl);
+    return enforceLightThemeHint(withAbsoluteAssets);
+  } catch {
+    return textToFallbackHtml(fallbackText);
+  }
+};
+
+const getFormResponseHtml = async ({ name, email, message, assetBaseUrl, fallbackText }) => {
+  try {
+    const templatePath = path.resolve(__dirname, "../form_response/email.html");
+    const template = await readFile(templatePath, "utf8");
+    const withAbsoluteAssets = replaceTemplateImagePaths(template, assetBaseUrl);
+
+    const detailsBlock = [
+      '<div style="padding:16px 20px 24px 20px;font-family:Arial,Helvetica,sans-serif;color:#111111;">',
+      '<p style="margin:0 0 8px 0;font-size:14px;"><strong>Form Details</strong></p>',
+      `<p style="margin:0 0 4px 0;font-size:14px;"><strong>Name:</strong> ${escapeHtml(name)}</p>`,
+      `<p style="margin:0 0 4px 0;font-size:14px;"><strong>Email:</strong> ${escapeHtml(email)}</p>`,
+      `<p style="margin:10px 0 4px 0;font-size:14px;"><strong>Message:</strong></p>`,
+      `<p style="margin:0;font-size:14px;white-space:pre-wrap;">${escapeHtml(message)}</p>`,
+      "</div>",
+    ].join("");
+
+    const withDetails = withAbsoluteAssets.includes("</body>")
+      ? withAbsoluteAssets.replace("</body>", `${detailsBlock}</body>`)
+      : `${withAbsoluteAssets}${detailsBlock}`;
+
+    return enforceLightThemeHint(withDetails);
   } catch {
     return textToFallbackHtml(fallbackText);
   }
@@ -143,7 +191,13 @@ export default async function handler(req, res) {
     return json(res, 400, { error: "Message must be at least 10 characters." });
   }
 
-  const { RESEND_API_KEY, CONTACT_TO_EMAIL, CONTACT_FROM_EMAIL } = process.env;
+  const {
+    RESEND_API_KEY,
+    CONTACT_TO_EMAIL,
+    CONTACT_FROM_EMAIL,
+    EMAIL_ASSET_BASE_URL,
+    EMAIL_FORM_RESPONSE_ASSET_BASE_URL,
+  } = process.env;
 
   if (!RESEND_API_KEY || !CONTACT_FROM_EMAIL) {
     return json(res, 500, {
@@ -153,7 +207,8 @@ export default async function handler(req, res) {
 
   try {
     const thankYouText = await getThankYouText(cleanName);
-    const thankYouHtml = await getThankYouHtml(cleanName);
+    const assetBaseUrl = normalizeAssetBaseUrl(EMAIL_ASSET_BASE_URL);
+    const thankYouHtml = await getThankYouHtml(cleanName, assetBaseUrl);
 
     const userEmailPayload = {
       from: CONTACT_FROM_EMAIL,
@@ -166,18 +221,27 @@ export default async function handler(req, res) {
     const requests = [sendWithResend(RESEND_API_KEY, userEmailPayload)];
 
     if (CONTACT_TO_EMAIL) {
+      const ownerText = await getFormResponseText({
+        name: cleanName,
+        email: cleanEmail,
+        message: cleanMessage,
+      });
+      const ownerAssetBaseUrl = normalizeFormResponseAssetBaseUrl(EMAIL_FORM_RESPONSE_ASSET_BASE_URL);
+      const ownerHtml = await getFormResponseHtml({
+        name: cleanName,
+        email: cleanEmail,
+        message: cleanMessage,
+        assetBaseUrl: ownerAssetBaseUrl,
+        fallbackText: ownerText,
+      });
+
       const ownerEmailPayload = {
         from: CONTACT_FROM_EMAIL,
         to: [CONTACT_TO_EMAIL],
         reply_to: cleanEmail,
         subject: `New portfolio contact from ${cleanName}`,
-        text: [
-          `Name: ${cleanName}`,
-          `Email: ${cleanEmail}`,
-          "",
-          "Message:",
-          cleanMessage,
-        ].join("\n"),
+        text: ownerText,
+        html: ownerHtml,
       };
 
       requests.push(sendWithResend(RESEND_API_KEY, ownerEmailPayload));
