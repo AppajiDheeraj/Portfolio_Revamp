@@ -106,6 +106,8 @@ const ContactForm = () => {
               onChange={handleChange}
               tabIndex={-1}
               autoComplete="off"
+              aria-label="Company"
+              aria-hidden="true"
               style={{ display: "none" }}
             />
 
@@ -114,6 +116,8 @@ const ContactForm = () => {
                 type="text"
                 name="name"
                 placeholder={form.placeholders.name}
+                aria-label={form.placeholders.name}
+                autoComplete="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -125,6 +129,8 @@ const ContactForm = () => {
                 type="email"
                 name="email"
                 placeholder={form.placeholders.email}
+                aria-label={form.placeholders.email}
+                autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -136,6 +142,7 @@ const ContactForm = () => {
                 name="message"
                 rows={6}
                 placeholder={form.placeholders.message}
+                aria-label={form.placeholders.message}
                 value={formData.message}
                 onChange={handleChange}
                 required
@@ -149,7 +156,12 @@ const ContactForm = () => {
             </div>
 
             {submitMessage ? (
-              <p className="primary sm" style={{ color: isError ? "#cf2f2f" : "inherit" }}>
+              <p
+                className="primary sm"
+                role={isError ? "alert" : "status"}
+                aria-live="polite"
+                style={{ color: isError ? "#cf2f2f" : "inherit" }}
+              >
                 {submitMessage}
               </p>
             ) : null}

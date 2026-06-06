@@ -1,6 +1,7 @@
 .reviews {
   position: relative;
   width: 100vw;
+  height: 100vh;
   height: 100svh;
   padding: 4em 2em;
   background-color: var(--fg);
@@ -46,6 +47,8 @@
 }
 
 .review-thumbnail {
+  padding: 0;
+  background: transparent;
   aspect-ratio: 5/3;
   min-height: 50px;
   border: 1px dashed var(--bg200);
@@ -53,6 +56,11 @@
   overflow: hidden;
   cursor: pointer;
   transition: border 0.3s ease-in-out;
+}
+
+.review-thumbnail:focus-visible {
+  outline: 2px solid var(--bg);
+  outline-offset: 0.25rem;
 }
 
 .review-thumbnail.active {

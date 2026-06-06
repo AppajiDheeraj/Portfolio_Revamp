@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
+  height: 100vh;
   height: 100svh;
   overflow: hidden;
   display: flex;
@@ -62,6 +63,7 @@
 .sticky-titles {
   position: relative;
   width: 100vw;
+  height: 100vh;
   height: 100svh;
   overflow: hidden;
   padding: 2em;
@@ -99,6 +101,7 @@
 .sticky-work-header {
   position: relative;
   width: 100vw;
+  height: 100vh;
   height: 100svh;
   padding: 2em;
   display: flex;
@@ -253,6 +256,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: 100vh;
   min-height: 100svh;
 }
 

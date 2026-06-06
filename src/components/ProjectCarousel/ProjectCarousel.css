@@ -1,7 +1,9 @@
 .fieldwork-routine {
   position: relative;
   width: 100%;
+  height: 100vh;
   height: 100svh;
+  min-height: 100vh;
   min-height: 100svh;
   padding: 2em;
   box-sizing: border-box;

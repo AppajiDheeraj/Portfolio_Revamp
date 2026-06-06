@@ -8,7 +8,7 @@ import gsap from "gsap";
 
 const FAQContainer = ({ title = true, fullWidth = false }) => {
   const { faq } = siteConfig;
-  const [, setActiveIndices] = useState([]);
+  const [activeIndices, setActiveIndices] = useState([]);
   const iconRefs = useRef([]);
   const contentRefs = useRef([]);
   const faqItemsRef = useRef([]);
@@ -93,11 +93,16 @@ const FAQContainer = ({ title = true, fullWidth = false }) => {
         <div className="faq-items">
           {faqItems.map((item, index) => (
             <div
-              key={index}
+              key={item.question}
               className="faq-item"
               ref={(el) => (faqItemsRef.current[index] = el)}
             >
-              <div className="faq-question" onClick={() => toggleFAQ(index)}>
+              <button
+                className="faq-question"
+                type="button"
+                aria-expanded={activeIndices.includes(index)}
+                onClick={() => toggleFAQ(index)}
+              >
                 <h3>{item.question}</h3>
                 <span
                   className="faq-icon"
@@ -105,7 +110,7 @@ const FAQContainer = ({ title = true, fullWidth = false }) => {
                 >
                   <ArrowRight size={20} />
                 </span>
-              </div>
+              </button>
               <div
                 className="faq-answer"
                 ref={(el) => (contentRefs.current[index] = el)}

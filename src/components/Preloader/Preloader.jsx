@@ -10,12 +10,13 @@ gsap.registerPlugin(SplitText);
 const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
   const [showPreloader, setShowPreloader] = useState(true);
   const [loaderAnimating, setLoaderAnimating] = useState(true);
-  const [canStartExitAnimation, setCanStartExitAnimation] = useState(false);
+  const [hasExitWaitElapsed, setHasExitWaitElapsed] = useState(false);
   const [isIntroComplete, setIsIntroComplete] = useState(false);
   const wrapperRef = useRef(null);
   const hasCompletedRef = useRef(false);
   const completionTimeoutRef = useRef(null);
   const lenis = useLenis();
+  const canStartExitAnimation = readyToExit || hasExitWaitElapsed;
 
   const completePreloader = useCallback(() => {
     if (hasCompletedRef.current) {
@@ -31,19 +32,13 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
   }, [onAnimationComplete]);
 
   useEffect(() => {
-    if (readyToExit) {
-      setCanStartExitAnimation(true);
-    }
-  }, [readyToExit]);
-
-  useEffect(() => {
     if (canStartExitAnimation) {
       return undefined;
     }
 
     // Prevent the intro from hanging forever if any preload request stalls.
     const fallbackId = window.setTimeout(() => {
-      setCanStartExitAnimation(true);
+      setHasExitWaitElapsed(true);
     }, 7000);
 
     return () => {

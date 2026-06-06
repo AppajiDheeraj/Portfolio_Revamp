@@ -3,6 +3,7 @@
 .split-cards {
   position: relative;
   width: 100%;
+  min-height: 100vh;
   min-height: 100svh;
   background: radial-gradient(circle at 20% 20%, #262626 0%, #0e0e0e 65%);
   color: #f2f2ee;

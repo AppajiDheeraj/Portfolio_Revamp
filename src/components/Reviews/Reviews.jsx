@@ -152,15 +152,18 @@ const Reviews = () => {
 
       <div className="reviews-list">
         {reviews.map((review, index) => (
-          <div
+          <button
             key={review.id}
+            type="button"
             className={`review-thumbnail ${
               index === activeReview ? "active" : ""
             }`}
+            aria-label={`Show review by ${review.author}`}
+            aria-pressed={index === activeReview}
             onClick={() => handleReviewClick(index)}
           >
             <img src={review.image} alt={`Review by ${review.author}`} />
-          </div>
+          </button>
         ))}
       </div>
     </section>

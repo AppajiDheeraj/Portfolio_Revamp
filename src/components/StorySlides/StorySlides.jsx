@@ -6,8 +6,10 @@ import { gsap } from "gsap";
 import { Github } from "lucide-react";
 import Button from "../Button/Button.jsx";
 
+const stories = storySlides;
+const STORY_DURATION = 4600;
+
 export default function StorySlides() {
-  const stories = storySlides;
   const storiesContainerRef = useRef(null);
   const copyRef = useRef(null);
   const imageRef = useRef(null);
@@ -15,11 +17,12 @@ export default function StorySlides() {
   const animationRef = useRef(null);
   const activeStoryRef = useRef(0);
   const isAnimatingRef = useRef(false);
-  const preloadedSourcesRef = useRef(new Set());
+  const preloadedSourcesRef = useRef(null);
+  if (preloadedSourcesRef.current === null) {
+    preloadedSourcesRef.current = new Set();
+  }
   const [activeStory, setActiveStory] = useState(0);
   const [progressSeed, setProgressSeed] = useState(0);
-
-  const storyDuration = 4600;
 
   useEffect(() => {
     if (typeof window === "undefined" || !stories.length) {
@@ -35,7 +38,7 @@ export default function StorySlides() {
       image.src = story.storyImg;
       preloadedSourcesRef.current.add(story.storyImg);
     });
-  }, [stories]);
+  }, []);
 
   useEffect(() => {
     activeStoryRef.current = activeStory;
@@ -62,7 +65,7 @@ export default function StorySlides() {
 
         setActiveStory(nextIndex);
         setProgressSeed((seed) => seed + 1);
-      }, storyDuration);
+      }, STORY_DURATION);
     };
 
     scheduleNext();
@@ -72,7 +75,7 @@ export default function StorySlides() {
         window.clearTimeout(cycleTimeoutRef.current);
       }
     };
-  }, [stories, storyDuration, progressSeed]);
+  }, [progressSeed]);
 
   useEffect(() => {
     const copy = copyRef.current;
@@ -161,7 +164,6 @@ export default function StorySlides() {
     <section
       className="stories-container stories"
       ref={storiesContainerRef}
-      onClick={handleAdvance}
       aria-label="Selected work"
     >
       <div className="story-img">
@@ -177,6 +179,13 @@ export default function StorySlides() {
           />
         </div>
       </div>
+
+      <button
+        className="stories-advance-button"
+        type="button"
+        aria-label="Show next project"
+        onClick={handleAdvance}
+      />
 
       <div className="stories-footer">
         <div className="container">
@@ -198,7 +207,7 @@ export default function StorySlides() {
                   key={`highlight-${index}-${index === activeStory ? progressSeed : "idle"}`}
                   style={
                     index === activeStory
-                      ? { animationDuration: `${storyDuration}ms` }
+                      ? { animationDuration: `${STORY_DURATION}ms` }
                       : undefined
                   }
                 ></div>
@@ -230,7 +239,6 @@ export default function StorySlides() {
           <div
             className="link"
             data-story-animate
-            onClick={(event) => event.stopPropagation()}
           >
             <Button
               variant="light"

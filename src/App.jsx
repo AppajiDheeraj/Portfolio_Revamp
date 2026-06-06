@@ -47,6 +47,7 @@ function ScrollToTop() {
 
 function App() {
   const location = useLocation();
+  const { pathname } = location;
   const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
   const [isInitialLoadReady, setIsInitialLoadReady] = useState(false);
   const previousTitleRef = useRef(document.title);
@@ -55,10 +56,10 @@ function App() {
     let isMounted = true;
 
     const preloadCriticalAssets = async () => {
-      const currentPathLoader = routeLoaders[location.pathname];
+      const currentPathLoader = routeLoaders[pathname];
       const routePromises = [routeLoaders["/"]?.()];
 
-      if (currentPathLoader && location.pathname !== "/") {
+      if (currentPathLoader && pathname !== "/") {
         routePromises.push(currentPathLoader());
       }
 
@@ -79,7 +80,7 @@ function App() {
     return () => {
       isMounted = false;
     };
-  }, [location.pathname]);
+  }, [pathname]);
 
   useEffect(() => {
     // Preserve the original title so tab visibility messaging stays reversible.
@@ -145,7 +146,7 @@ function App() {
         <ScrollToTop />
         <NavBar />
         <Suspense fallback={null}>
-          <Routes location={location} key={location.pathname}>
+          <Routes location={location} key={pathname}>
             <Route
               path="/"
               element={<Home isPreloaderComplete={isPreloaderComplete} />}

@@ -1,6 +1,6 @@
 "use client";
 import "./RevealText.css";
-import { useEffect, useRef, useState } from "react";
+import { useId, useRef } from "react";
 
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -22,52 +22,36 @@ const RevealText = ({
   tag = "p",
 }) => {
   const copyRef = useRef(null);
-  const [copyId, setCopyId] = useState(null);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const textSplitRef = useRef(null);
-
-  useEffect(() => {
-    // Unique id keeps per-instance line wrappers isolated across multiple RevealText blocks.
-    setCopyId(`copy-${Math.floor(Math.random() * 10000)}`);
-  }, []);
-
-  useEffect(() => {
-    if (!copyId || !copyRef.current) return;
-
-    const lineClass = `line-${copyId}`;
-
-    const text = new SplitType(copyRef.current, {
-      types: "lines",
-      lineClass: lineClass,
-    });
-
-    textSplitRef.current = text;
-
-    const selector = lineSelector || `.${lineClass}`;
-    const lines = document.querySelectorAll(selector);
-
-    lines.forEach((line) => {
-      const content = line.innerHTML;
-      line.innerHTML = `<span class="line-inner-${copyId}">${content}</span>`;
-    });
-
-    const initialY = direction === "top" ? "-100%" : "100%";
-
-    gsap.set(`.line-inner-${copyId}`, {
-      y: initialY,
-      display: "block",
-    });
-
-    setIsInitialized(true);
-
-    return () => {
-      if (textSplitRef.current) textSplitRef.current.revert();
-    };
-  }, [copyId, lineSelector, direction]);
+  const reactId = useId();
+  const copyId = `copy-${reactId.replace(/:/g, "")}`;
 
   useGSAP(
     () => {
-      if (!isInitialized || !copyRef.current) return;
+      if (!copyRef.current) return;
+
+      const lineClass = `line-${copyId}`;
+      const text = new SplitType(copyRef.current, {
+        types: "lines",
+        lineClass,
+      });
+      const lines = lineSelector
+        ? document.querySelectorAll(lineSelector)
+        : text.lines;
+      const lineInners = [];
+
+      lines.forEach((line) => {
+        const lineInner = document.createElement("span");
+        lineInner.className = `line-inner-${copyId}`;
+        lineInner.innerHTML = line.innerHTML;
+        line.replaceChildren(lineInner);
+        lineInners.push(lineInner);
+      });
+
+      const initialY = direction === "top" ? "-100%" : "100%";
+      gsap.set(lineInners, {
+        y: initialY,
+        display: "block",
+      });
 
       const tl = gsap.timeline({
         defaults: {
@@ -85,31 +69,29 @@ const RevealText = ({
           : {}),
       });
 
-      tl.to(`.line-inner-${copyId}`, {
+      tl.to(lineInners, {
         y: "0%",
         stagger,
         delay,
       });
 
       return () => {
-        if (animateOnScroll) {
-          // Cleanup only triggers tied to this element to avoid affecting unrelated animations.
-          ScrollTrigger.getAll()
-            .filter((st) => st.vars.trigger === copyRef.current)
-            .forEach((st) => st.kill());
-        }
+        tl.scrollTrigger?.kill();
+        tl.kill();
+        text.revert();
       };
     },
     {
       scope: copyRef,
       dependencies: [
-        isInitialized,
+        copyId,
         animateOnScroll,
         delay,
         duration,
         ease,
         stagger,
         direction,
+        lineSelector,
       ],
     }
   );

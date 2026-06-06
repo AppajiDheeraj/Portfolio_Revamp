@@ -9,6 +9,34 @@ import { siteConfig } from "../../data";
 
 gsap.registerPlugin(SplitText);
 
+const scrambleText = (elements) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
+
+  elements.forEach((char) => {
+    const originalText = char.textContent;
+    let iterations = 0;
+    const maxIterations = Math.floor(Math.random() * 6) + 3;
+
+    gsap.set(char, { opacity: 1 });
+
+    const scrambleInterval = setInterval(() => {
+      char.textContent = chars[Math.floor(Math.random() * chars.length)];
+      iterations += 1;
+
+      if (iterations >= maxIterations) {
+        clearInterval(scrambleInterval);
+        char.textContent = originalText;
+      }
+    }, 35);
+  });
+};
+
+const getMenuLinkHandlers = (path) => ({
+  onMouseEnter: () => preloadRoute(path),
+  onFocus: () => preloadRoute(path),
+  onTouchStart: () => preloadRoute(path),
+});
+
 const NavBar = () => {
   const { navigation } = siteConfig;
   const menuRef = useRef(null);
@@ -23,37 +51,17 @@ const NavBar = () => {
   const isAnimating = useRef(false);
   const splitTexts = useRef([]);
   const footerSplitTexts = useRef([]);
-  const location = useLocation();
-  const previousPathRef = useRef(location.pathname);
-
-    // Scramble Text Animation
-  const scrambleText = (elements) => {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()";
-    elements.forEach((char) => {
-      const originalText = char.textContent;
-      let iterations = 0;
-      const maxIterations = Math.floor(Math.random() * 6) + 3;
-
-      gsap.set(char, { opacity: 1 });
-
-      const scrambleInterval = setInterval(() => {
-        char.textContent = chars[Math.floor(Math.random() * chars.length)];
-        if (++iterations >= maxIterations) {
-          clearInterval(scrambleInterval);
-          char.textContent = originalText;
-        }
-      }, 35);
-    });
-  };
+  const { pathname } = useLocation();
+  const previousPathRef = useRef(pathname);
 
   // Auto-close menu on route change
   useEffect(() => {
     // Route changes should always collapse the overlay to prevent stale open state.
-    if (location.pathname !== previousPathRef.current && isOpen) {
+    if (pathname !== previousPathRef.current && isOpen) {
       closeMenu(true);
     }
-    previousPathRef.current = location.pathname;
-  }, [location.pathname, isOpen]);
+    previousPathRef.current = pathname;
+  }, [pathname, isOpen]);
 
   // Close menu when clicking outside the header and overlay areas.
   useEffect(() => {
@@ -69,7 +77,7 @@ const NavBar = () => {
     };
 
     document.addEventListener("mousedown", handleOutsideClick);
-    document.addEventListener("touchstart", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick, { passive: true });
 
     return () => {
       document.removeEventListener("mousedown", handleOutsideClick);
@@ -128,7 +136,7 @@ const NavBar = () => {
       lastScrollY = currentScrollY;
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
     const updateTime = () => {
       if (timeRef.current) {
@@ -260,12 +268,6 @@ const NavBar = () => {
     closeMenu(true);
   };
 
-  const getMenuLinkHandlers = (path) => ({
-    onMouseEnter: () => preloadRoute(path),
-    onFocus: () => preloadRoute(path),
-    onTouchStart: () => preloadRoute(path),
-  });
-
   return (
     <>
       <div className="top-corner-badge top-corner-badge-left" aria-hidden="true">
@@ -282,7 +284,7 @@ const NavBar = () => {
       </a>
 
       <nav className="menu" ref={menuRef}>
-        <div className="menu-header" ref={menuHeaderRef} onClick={toggleMenu}>
+        <div className="menu-header" ref={menuHeaderRef}>
           <Link to="/" className="menu-logo" aria-label="Home">
             <img
               src="/global/logo.png"
@@ -290,7 +292,13 @@ const NavBar = () => {
               className={isOpen ? "rotated" : ""}
             />
           </Link>
-          <button className="menu-toggle" aria-label="Toggle menu">
+          <button
+            className="menu-toggle"
+            type="button"
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isOpen}
+            onClick={toggleMenu}
+          >
             <div
               ref={hamburgerMenuRef}
               className={`menu-hamburger-icon ${isOpen ? "open" : ""}`}
