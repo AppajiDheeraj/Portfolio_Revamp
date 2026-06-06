@@ -1,5 +1,5 @@
 import "./Preloader.css";
-import { useEffect, useState, useRef } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
@@ -14,7 +14,21 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
   const [isIntroComplete, setIsIntroComplete] = useState(false);
   const wrapperRef = useRef(null);
   const hasCompletedRef = useRef(false);
+  const completionTimeoutRef = useRef(null);
   const lenis = useLenis();
+
+  const completePreloader = useCallback(() => {
+    if (hasCompletedRef.current) {
+      return;
+    }
+
+    hasCompletedRef.current = true;
+    setLoaderAnimating(false);
+    completionTimeoutRef.current = window.setTimeout(() => {
+      setShowPreloader(false);
+      onAnimationComplete?.();
+    }, 60);
+  }, [onAnimationComplete]);
 
   useEffect(() => {
     if (readyToExit) {
@@ -50,20 +64,7 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
     return () => {
       window.clearTimeout(emergencyId);
     };
-  }, [showPreloader]);
-
-  const completePreloader = () => {
-    if (hasCompletedRef.current) {
-      return;
-    }
-
-    hasCompletedRef.current = true;
-    setLoaderAnimating(false);
-    window.setTimeout(() => {
-      setShowPreloader(false);
-      if (onAnimationComplete) onAnimationComplete();
-    }, 60);
-  };
+  }, [completePreloader, showPreloader]);
 
   useEffect(() => {
     // Lock both Lenis and native scroll so users cannot bypass the intro state.
@@ -74,7 +75,20 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
       if (lenis) lenis.start();
       document.body.style.overflow = "";
     }
+
+    return () => {
+      if (lenis) lenis.start();
+      document.body.style.overflow = "";
+    };
   }, [lenis, loaderAnimating]);
+
+  useEffect(() => {
+    return () => {
+      if (completionTimeoutRef.current) {
+        window.clearTimeout(completionTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useGSAP(
     () => {
@@ -105,9 +119,6 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
           return tl;
         }
 
-        const isMobile = window.innerWidth < 1000;
-        const maskScale = isMobile ? 25 : 15;
-
         introTimeline = gsap.timeline({
           delay: 0.1,
           onComplete: () => {
@@ -136,7 +147,7 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
     },
     {
       scope: wrapperRef,
-      dependencies: [showPreloader, onAnimationComplete],
+      dependencies: [showPreloader, completePreloader],
     }
   );
 
@@ -185,7 +196,12 @@ const Preloader = ({ onAnimationComplete, readyToExit = false }) => {
     },
     {
       scope: wrapperRef,
-      dependencies: [showPreloader, isIntroComplete, canStartExitAnimation],
+      dependencies: [
+        showPreloader,
+        isIntroComplete,
+        canStartExitAnimation,
+        completePreloader,
+      ],
     }
   );
 

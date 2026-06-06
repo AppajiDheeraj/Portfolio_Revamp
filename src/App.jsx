@@ -1,9 +1,8 @@
 import "./App.css";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { preloadAllRoutes, routeLoaders } from "./utils/routePreload";
 import { preloadImages, aboutDeskImageSources } from "./utils/preloadAssets";
-import FAQ from "./pages/FAQ/FAQ";
 
 import NavBar from "./components/NavBar/NavBar";
 import Preloader from "./components/Preloader/Preloader";
@@ -13,6 +12,7 @@ const Work = lazy(routeLoaders["/work"]);
 const Project = lazy(routeLoaders["/sample-project"]);
 const About = lazy(routeLoaders["/about"]);
 const Contact = lazy(routeLoaders["/contact"]);
+const FAQ = lazy(routeLoaders["/faq"]);
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -155,6 +155,7 @@ function App() {
             <Route path="/faq" element={<FAQ />} />
             <Route path="/work" element={<Work />} />
             <Route path="/sample-project" element={<Project />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
       </div>
