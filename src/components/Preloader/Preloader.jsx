@@ -3,7 +3,6 @@ import {
   useCallback,
   useEffect,
   useImperativeHandle,
-  useState,
   useRef,
 } from "react";
 import { useLenis } from "lenis/react";
@@ -14,12 +13,12 @@ import { useGSAP } from "@gsap/react";
 gsap.registerPlugin(SplitText);
 
 const Preloader = ({ onAnimationComplete, ref }) => {
-  const [showPreloader, setShowPreloader] = useState(true);
   const wrapperRef = useRef(null);
   const hasCompletedRef = useRef(false);
   const introCompleteRef = useRef(false);
   const exitReadyRef = useRef(false);
   const startExitRef = useRef(() => {});
+  const prepareForUnmountRef = useRef(() => {});
   const lenis = useLenis();
 
   const completePreloader = useCallback(() => {
@@ -28,8 +27,13 @@ const Preloader = ({ onAnimationComplete, ref }) => {
     }
 
     hasCompletedRef.current = true;
-    setShowPreloader(false);
-    onAnimationComplete?.();
+    prepareForUnmountRef.current();
+
+    // SplitText mutates the heading DOM. Give React one frame after restoring
+    // the original nodes before the parent unmounts the preloader.
+    window.requestAnimationFrame(() => {
+      onAnimationComplete?.();
+    });
   }, [onAnimationComplete]);
 
   useImperativeHandle(
@@ -60,10 +64,6 @@ const Preloader = ({ onAnimationComplete, ref }) => {
   }, []);
 
   useEffect(() => {
-    if (!showPreloader) {
-      return undefined;
-    }
-
     // Absolute escape hatch: never allow a permanent hidden app state.
     const emergencyId = window.setTimeout(() => {
       completePreloader();
@@ -72,28 +72,21 @@ const Preloader = ({ onAnimationComplete, ref }) => {
     return () => {
       window.clearTimeout(emergencyId);
     };
-  }, [completePreloader, showPreloader]);
+  }, [completePreloader]);
 
   useEffect(() => {
     // Lock both Lenis and native scroll so users cannot bypass the intro state.
-    if (showPreloader) {
-      if (lenis) lenis.stop();
-      document.body.style.overflow = "hidden";
-    } else {
-      if (lenis) lenis.start();
-      document.body.style.overflow = "";
-    }
+    if (lenis) lenis.stop();
+    document.body.style.overflow = "hidden";
 
     return () => {
       if (lenis) lenis.start();
       document.body.style.overflow = "";
     };
-  }, [lenis, showPreloader]);
+  }, [lenis]);
 
   useGSAP(
     () => {
-      if (!showPreloader) return;
-
       let logoSplit;
       let introTimeline;
       let exitTimeline;
@@ -164,6 +157,16 @@ const Preloader = ({ onAnimationComplete, ref }) => {
         };
 
         startExitRef.current = startExit;
+        prepareForUnmountRef.current = () => {
+          startExitRef.current = () => {};
+          introTimeline?.kill();
+          exitTimeline?.kill();
+
+          if (logoSplit) {
+            logoSplit.revert();
+            logoSplit = null;
+          }
+        };
 
         introTimeline = gsap.timeline({
           delay: 0.1,
@@ -181,16 +184,8 @@ const Preloader = ({ onAnimationComplete, ref }) => {
         }).add(animateProgress(), "<");
 
         return () => {
-          startExitRef.current = () => {};
-          if (introTimeline) {
-            introTimeline.kill();
-          }
-          if (exitTimeline) {
-            exitTimeline.kill();
-          }
-          if (logoSplit) {
-            logoSplit.revert();
-          }
+          prepareForUnmountRef.current();
+          prepareForUnmountRef.current = () => {};
         };
       } catch {
         completePreloader();
@@ -198,11 +193,9 @@ const Preloader = ({ onAnimationComplete, ref }) => {
     },
     {
       scope: wrapperRef,
-      dependencies: [showPreloader, completePreloader],
+      dependencies: [completePreloader],
     }
   );
-
-  if (!showPreloader) return null;
 
   return (
     <div className="preloader-wrapper" ref={wrapperRef}>
