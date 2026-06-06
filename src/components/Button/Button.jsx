@@ -1,13 +1,31 @@
 import "./Button.css";
 import { HiLightningBolt } from "react-icons/hi";
 import React, { useRef } from "react";
-import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
+
+const waitForFonts = async () => {
+  try {
+    await document.fonts.ready;
+
+    const customFonts = [
+      "Geist Mono",
+      "PP Neue Montreal",
+      "PP Pangram Sans",
+      "Big Shoulders Display",
+    ];
+    await Promise.all(
+      customFonts.map((fontFamily) => document.fonts.check(`16px ${fontFamily}`))
+    );
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+};
 
 export default function Button({
   href,
@@ -21,7 +39,6 @@ export default function Button({
   rel,
 }) {
   const IconComponent = icon || HiLightningBolt;
-  const navigate = useNavigate();
   const buttonRef = useRef(null);
   const labelRef = useRef(null);
   const labelInnerRef = useRef(null);
@@ -29,31 +46,6 @@ export default function Button({
   const splitRef = useRef(null);
   const lines = useRef([]);
 
-  const waitForFonts = async () => {
-    try {
-      await document.fonts.ready;
-
-      const customFonts = [
-        "Geist Mono",
-        "PP Neue Montreal",
-        "PP Pangram Sans",
-        "Big Shoulders Display",
-      ];
-      const fontCheckPromises = customFonts.map((fontFamily) => {
-        return document.fonts.check(`16px ${fontFamily}`);
-      });
-
-      await Promise.all(fontCheckPromises);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      return true;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return true;
-    }
-  };
-
-  const isInternalRoute = typeof href === "string" && href.startsWith("/");
   const computedRel = rel || (target === "_blank" ? "noopener noreferrer" : undefined);
 
   useGSAP(
@@ -154,17 +146,6 @@ export default function Button({
       target={target}
       rel={computedRel}
       className={`button button--${variant}`}
-      onClick={(e) => {
-        if (!href || !isInternalRoute) return;
-        e.preventDefault();
-
-        if (typeof document !== "undefined" && document.startViewTransition) {
-          document.startViewTransition(() => navigate(href));
-          return;
-        }
-
-        navigate(href);
-      }}
     >
       <span className="button-label" ref={labelRef}>
         <span className="button-label-inner" ref={labelInnerRef}>

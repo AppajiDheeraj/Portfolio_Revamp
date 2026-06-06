@@ -9,15 +9,19 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "knip": {
+    "entry": [
+      "src/main.jsx",
+      "api/contact.js"
+    ]
+  },
   "dependencies": {
     "@gsap/react": "^2.1.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "framer-motion": "^11.11.17",
     "gsap": "^3.14.2",
     "lenis": "^1.2.3",
     "lucide-react": "^0.483.0",
-    "matter-js": "^0.20.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",

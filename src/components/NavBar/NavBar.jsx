@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./NavBar.css";
 import { gsap } from "gsap";
 import { SplitText } from "gsap/SplitText";
@@ -51,18 +51,6 @@ const NavBar = () => {
   const isAnimating = useRef(false);
   const splitTexts = useRef([]);
   const footerSplitTexts = useRef([]);
-  const { pathname } = useLocation();
-  const previousPathRef = useRef(pathname);
-
-  // Auto-close menu on route change
-  useEffect(() => {
-    // Route changes should always collapse the overlay to prevent stale open state.
-    if (pathname !== previousPathRef.current && isOpen) {
-      closeMenu(true);
-    }
-    previousPathRef.current = pathname;
-  }, [pathname, isOpen]);
-
   // Close menu when clicking outside the header and overlay areas.
   useEffect(() => {
     if (!isOpen) return;

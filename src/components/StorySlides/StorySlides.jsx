@@ -22,7 +22,6 @@ export default function StorySlides() {
     preloadedSourcesRef.current = new Set();
   }
   const [activeStory, setActiveStory] = useState(0);
-  const [progressSeed, setProgressSeed] = useState(0);
 
   useEffect(() => {
     if (typeof window === "undefined" || !stories.length) {
@@ -49,33 +48,32 @@ export default function StorySlides() {
       return undefined;
     }
 
+    let timeoutId;
+
     const scheduleNext = () => {
-      if (cycleTimeoutRef.current) {
-        window.clearTimeout(cycleTimeoutRef.current);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
       }
 
-      cycleTimeoutRef.current = window.setTimeout(() => {
+      timeoutId = window.setTimeout(() => {
         if (isAnimatingRef.current) {
           scheduleNext();
           return;
         }
 
-        const currentIndex = activeStoryRef.current;
-        const nextIndex = (currentIndex + 1) % stories.length;
-
-        setActiveStory(nextIndex);
-        setProgressSeed((seed) => seed + 1);
+        setActiveStory((currentIndex) => (currentIndex + 1) % stories.length);
       }, STORY_DURATION);
+      cycleTimeoutRef.current = timeoutId;
     };
 
     scheduleNext();
 
     return () => {
-      if (cycleTimeoutRef.current) {
-        window.clearTimeout(cycleTimeoutRef.current);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
       }
     };
-  }, [progressSeed]);
+  }, [activeStory]);
 
   useEffect(() => {
     const copy = copyRef.current;
@@ -151,7 +149,6 @@ export default function StorySlides() {
     const nextIndex = (currentIndex + 1) % stories.length;
 
     setActiveStory(nextIndex);
-    setProgressSeed((seed) => seed + 1);
   };
 
   if (!stories.length) {
@@ -204,7 +201,7 @@ export default function StorySlides() {
               >
                 <div
                   className="index-highlight"
-                  key={`highlight-${index}-${index === activeStory ? progressSeed : "idle"}`}
+                  key={`highlight-${index}-${activeStory}`}
                   style={
                     index === activeStory
                       ? { animationDuration: `${STORY_DURATION}ms` }

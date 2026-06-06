@@ -1,5 +1,4 @@
 import React, {
-  forwardRef,
   useRef,
   useEffect,
   useImperativeHandle,
@@ -14,12 +13,13 @@ const debounce = (func, wait) => {
   };
 };
 
-export const Shader = forwardRef(function Shader(props, ref) {
+const Shader = function Shader(props) {
   const {
     source,
     uniforms = {},
     maxFps = 60,
     initialState = "playing",
+    ref,
   } = props;
 
   const canvasRef = useRef(null);
@@ -211,19 +211,17 @@ export const Shader = forwardRef(function Shader(props, ref) {
     ref: canvasRef,
     "aria-hidden": "true",
   });
-});
+};
 
-export const DottedShader = forwardRef(function DottedShader(
-  {
-    colors = [[0, 0, 0]],
-    opacities = [0.3, 0.3, 0.65, 0.65, 0.9, 1.0],
-    totalSize,
-    dotSize,
-    shader,
-    center,
-  },
-  ref
-) {
+export const DottedShader = function DottedShader({
+  colors = [[0, 0, 0]],
+  opacities = [0.3, 0.3, 0.65, 0.65, 0.9, 1.0],
+  totalSize,
+  dotSize,
+  shader,
+  center,
+  ref,
+}) {
   const processedColors = useMemo(() => {
     let cols;
 
@@ -307,4 +305,4 @@ export const DottedShader = forwardRef(function DottedShader(
     uniforms,
     maxFps: 60,
   });
-});
+};

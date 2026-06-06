@@ -1,6 +1,13 @@
 import "./App.css";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
-import { Suspense, lazy, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Suspense,
+  lazy,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { preloadAllRoutes, routeLoaders } from "./utils/routePreload";
 import { preloadImages, aboutDeskImageSources } from "./utils/preloadAssets";
 
@@ -13,6 +20,7 @@ const Project = lazy(routeLoaders["/sample-project"]);
 const About = lazy(routeLoaders["/about"]);
 const Contact = lazy(routeLoaders["/contact"]);
 const FAQ = lazy(routeLoaders["/faq"]);
+const DEFAULT_DOCUMENT_TITLE = document.title;
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -49,8 +57,7 @@ function App() {
   const location = useLocation();
   const { pathname } = location;
   const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
-  const [isInitialLoadReady, setIsInitialLoadReady] = useState(false);
-  const previousTitleRef = useRef(document.title);
+  const preloaderRef = useRef(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -71,7 +78,7 @@ function App() {
       await Promise.allSettled(preloadTasks);
 
       if (isMounted) {
-        setIsInitialLoadReady(true);
+        preloaderRef.current?.startExit();
       }
     };
 
@@ -86,19 +93,18 @@ function App() {
     // Preserve the original title so tab visibility messaging stays reversible.
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        previousTitleRef.current = document.title;
         document.title = "Tab's Lonely";
         return;
       }
 
-      document.title = previousTitleRef.current;
+      document.title = DEFAULT_DOCUMENT_TITLE;
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      document.title = previousTitleRef.current;
+      document.title = DEFAULT_DOCUMENT_TITLE;
     };
   }, []);
 
@@ -138,13 +144,13 @@ function App() {
     <>
       {!isPreloaderComplete && (
         <Preloader
+          ref={preloaderRef}
           onAnimationComplete={handlePreloaderComplete}
-          readyToExit={isInitialLoadReady}
         />
       )}
       <div className={`app-shell ${isPreloaderComplete ? "ready" : ""}`}>
         <ScrollToTop />
-        <NavBar />
+        <NavBar key={pathname} />
         <Suspense fallback={null}>
           <Routes location={location} key={pathname}>
             <Route

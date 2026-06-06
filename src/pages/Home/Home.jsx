@@ -27,24 +27,27 @@ const ProjectCarousel = lazy(() =>
 );
 const ContactForm = lazy(() => import("../../components/ContactForm/ContactForm"));
 
+let shouldPlayInitialMatrix;
+
+const getInitialMatrixState = () => {
+  if (shouldPlayInitialMatrix !== undefined) {
+    return shouldPlayInitialMatrix;
+  }
+
+  shouldPlayInitialMatrix = !sessionStorage.getItem("home-dot-matrix-seen");
+  if (shouldPlayInitialMatrix) {
+    sessionStorage.setItem("home-dot-matrix-seen", "true");
+  }
+
+  return shouldPlayInitialMatrix;
+};
+
 const Home = ({ isPreloaderComplete = false }) => {
   const stickyTitlesRef = useRef(null);
   const titlesRef = useRef([]);
   const stickyWorkHeaderRef = useRef(null);
   const homeWorkRef = useRef(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  useEffect(() => {
-    // Only run the long hero intro once per browser session to keep return visits snappy.
-    const hasSeenHomeMatrix = sessionStorage.getItem("home-dot-matrix-seen");
-
-    if (hasSeenHomeMatrix) {
-      setIsInitialLoad(false);
-      return;
-    }
-
-    sessionStorage.setItem("home-dot-matrix-seen", "true");
-  }, []);
+  const [isInitialLoad] = useState(getInitialMatrixState);
 
   useEffect(() => {
     const handleResize = () => {

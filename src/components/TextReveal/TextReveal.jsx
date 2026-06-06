@@ -9,6 +9,21 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(SplitText, ScrollTrigger);
 
+const waitForFonts = async () => {
+  try {
+    const customFonts = ["Koulen", "Host Grotesk", "DM Mono"];
+    const fontReadyPromise = document.fonts.ready;
+    const fontCheckPromises = customFonts.map((fontFamily) =>
+      document.fonts.check(`16px ${fontFamily}`)
+    );
+
+    await Promise.all([fontReadyPromise, ...fontCheckPromises]);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  } catch {
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+};
+
 export default function TextReveal({
   children,
   animateOnScroll = true,
@@ -18,25 +33,6 @@ export default function TextReveal({
   const containerRef = useRef(null);
   const elementRefs = useRef([]);
   const splitRefs = useRef([]);
-
-  const waitForFonts = async () => {
-    try {
-      // Split calculations are font-sensitive; wait to avoid broken line wraps.
-      const customFonts = ["Koulen", "Host Grotesk", "DM Mono"];
-      const fontReadyPromise = document.fonts.ready;
-      const fontCheckPromises = customFonts.map((fontFamily) =>
-        document.fonts.check(`16px ${fontFamily}`)
-      );
-
-      await Promise.all([fontReadyPromise, ...fontCheckPromises]);
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      return true;
-    } catch {
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      return true;
-    }
-  };
 
   useGSAP(
     () => {

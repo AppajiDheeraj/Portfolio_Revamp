@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
+import "./ParallaxImage.css";
 
 import { useLenis } from "lenis/react";
 
@@ -10,44 +11,40 @@ const ParallaxImage = ({ src, alt, speed = 0.2 }) => {
   const bounds = useRef(null);
   const currentTranslateY = useRef(0);
   const targetTranslateY = useRef(0);
-  const rafId = useRef(null);
-  const [isDesktop, setIsDesktop] = useState(false);
+  const isDesktopRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 900);
-    };
-
-    checkScreenSize();
-
-    window.addEventListener("resize", checkScreenSize);
-
-    return () => {
-      window.removeEventListener("resize", checkScreenSize);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!isDesktop) return;
+    const mediaQuery = window.matchMedia("(min-width: 900px)");
+    let animationFrameId;
 
     const updateBounds = () => {
-      if (imageRef.current) {
-        const rect = imageRef.current.getBoundingClientRect();
-        bounds.current = {
-          top: rect.top + window.scrollY,
-          bottom: rect.bottom + window.scrollY,
-          height: rect.height,
-        };
+      if (!imageRef.current || !isDesktopRef.current) {
+        bounds.current = null;
+        return;
       }
+
+      const rect = imageRef.current.getBoundingClientRect();
+      bounds.current = {
+        top: rect.top + window.scrollY,
+        height: rect.height,
+      };
     };
 
+    const handleViewportChange = (event) => {
+      isDesktopRef.current = event.matches;
+      if (!event.matches && imageRef.current) {
+        imageRef.current.style.transform = "";
+      }
+      updateBounds();
+    };
+
+    isDesktopRef.current = mediaQuery.matches;
     updateBounds();
+    mediaQuery.addEventListener("change", handleViewportChange);
     window.addEventListener("resize", updateBounds);
 
     const animate = () => {
-      if (imageRef.current && bounds.current) {
+      if (isDesktopRef.current && imageRef.current && bounds.current) {
         currentTranslateY.current = lerp(
           currentTranslateY.current,
           targetTranslateY.current,
@@ -60,21 +57,22 @@ const ParallaxImage = ({ src, alt, speed = 0.2 }) => {
           imageRef.current.style.transform = `translateY(${currentTranslateY.current}px) scale(1.5)`;
         }
       }
-      rafId.current = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
     animate();
 
     return () => {
+      mediaQuery.removeEventListener("change", handleViewportChange);
       window.removeEventListener("resize", updateBounds);
-      if (rafId.current) {
-        cancelAnimationFrame(rafId.current);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [isDesktop]);
+  }, []);
 
   useLenis(({ scroll }) => {
-    if (!isDesktop || !bounds.current) return;
+    if (!isDesktopRef.current || !bounds.current) return;
 
     const windowHeight = window.innerHeight;
     const elementMiddle = bounds.current.top + bounds.current.height / 2;
@@ -89,16 +87,7 @@ const ParallaxImage = ({ src, alt, speed = 0.2 }) => {
       ref={imageRef}
       src={src}
       alt={alt}
-      style={{
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        willChange: isDesktop ? "transform" : "auto",
-        transform: isDesktop ? "translateY(0) scale(1.5)" : "none",
-        position: "absolute",
-        top: 0,
-        left: 0,
-      }}
+      className="parallax-image"
     />
   );
 };

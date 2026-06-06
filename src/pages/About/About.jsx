@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./About.css";
 
 import ContactForm from "../../components/ContactForm/ContactForm";
 import Footer from "../../components/Footer/Footer";
+import AboutSpotlight from "../../components/AboutSpotlight/AboutSpotlight";
 import { siteConfig } from "../../data";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -165,7 +166,6 @@ const deskModes = [
 
 const About = () => {
   const aboutConfig = siteConfig.about;
-  const animeSectionRef = useRef(null);
   const deskSectionRef = useRef(null);
   const deskFrameRef = useRef(null);
   const deskHeaderRef = useRef(null);
@@ -191,29 +191,12 @@ const About = () => {
       setIsMobileViewport(event.matches);
     };
 
-    setIsMobileViewport(mediaQuery.matches);
-
     mediaQuery.addEventListener("change", handleViewportChange);
 
     return () => {
       mediaQuery.removeEventListener("change", handleViewportChange);
     };
   }, []);
-
-  const paragraphWords = useMemo(() => {
-    const keywords = new Set(aboutConfig.spotlightKeywords);
-
-    return aboutConfig.spotlightParagraphs.map((paragraph) =>
-      paragraph.split(/\s+/).map((word) => {
-        const normalizedWord = word.toLowerCase().replace(/[.,!?;:"]/g, "");
-        return {
-          word,
-          normalizedWord,
-          isKeyword: keywords.has(normalizedWord),
-        };
-      })
-    );
-  }, [aboutConfig.spotlightKeywords, aboutConfig.spotlightParagraphs]);
 
   const setDeskItemRef = (id) => (node) => {
     if (node) {
@@ -225,115 +208,13 @@ const About = () => {
   };
 
   useEffect(() => {
-    const triggers = [];
-
-    if (animeSectionRef.current) {
-      const words = Array.from(
-        animeSectionRef.current.querySelectorAll(".anime-text .word")
-      );
-      const wordHighlightBgColor = "191, 188, 180";
-
-      triggers.push(
-        ScrollTrigger.create({
-          trigger: animeSectionRef.current,
-          pin: true,
-          start: "top top",
-          end: `+=${window.innerHeight * 4}`,
-          pinSpacing: true,
-          onUpdate: (self) => {
-            const progress = self.progress;
-            const totalWords = words.length || 1;
-
-            words.forEach((word, index) => {
-              const wordText = word.querySelector("span");
-              if (!wordText) return;
-
-              if (progress <= 0.7) {
-                const revealProgress = Math.min(1, progress / 0.7);
-                const overlapWords = 15;
-                const totalAnimationLength = 1 + overlapWords / totalWords;
-                const wordStart = index / totalWords;
-                const wordEnd = wordStart + overlapWords / totalWords;
-
-                const timelineScale =
-                  1 /
-                  Math.min(
-                    totalAnimationLength,
-                    1 + (totalWords - 1) / totalWords + overlapWords / totalWords
-                  );
-
-                const adjustedStart = wordStart * timelineScale;
-                const adjustedEnd = wordEnd * timelineScale;
-                const duration = adjustedEnd - adjustedStart || 1;
-
-                const wordProgress =
-                  revealProgress <= adjustedStart
-                    ? 0
-                    : revealProgress >= adjustedEnd
-                    ? 1
-                    : (revealProgress - adjustedStart) / duration;
-
-                word.style.opacity = wordProgress;
-
-                const backgroundFadeStart =
-                  wordProgress >= 0.9 ? (wordProgress - 0.9) / 0.1 : 0;
-                const backgroundOpacity = Math.max(0, 1 - backgroundFadeStart);
-                word.style.backgroundColor = `rgba(${wordHighlightBgColor}, ${backgroundOpacity})`;
-
-                const textRevealProgress =
-                  wordProgress >= 0.9 ? (wordProgress - 0.9) / 0.1 : 0;
-                wordText.style.opacity = Math.pow(textRevealProgress, 0.5);
-              } else {
-                const reverseProgress = (progress - 0.7) / 0.3;
-                const reverseOverlapWords = 5;
-                const reverseWordStart = index / totalWords;
-                const reverseWordEnd = reverseWordStart + reverseOverlapWords / totalWords;
-
-                const reverseTimelineScale =
-                  1 /
-                  Math.max(
-                    1,
-                    (totalWords - 1) / totalWords + reverseOverlapWords / totalWords
-                  );
-
-                const reverseAdjustedStart = reverseWordStart * reverseTimelineScale;
-                const reverseAdjustedEnd = reverseWordEnd * reverseTimelineScale;
-                const reverseDuration = reverseAdjustedEnd - reverseAdjustedStart || 1;
-
-                const reverseWordProgress =
-                  reverseProgress <= reverseAdjustedStart
-                    ? 0
-                    : reverseProgress >= reverseAdjustedEnd
-                    ? 1
-                    : (reverseProgress - reverseAdjustedStart) / reverseDuration;
-
-                word.style.opacity = 1;
-                if (reverseWordProgress > 0) {
-                  wordText.style.opacity = 1 - reverseWordProgress;
-                  word.style.backgroundColor = `rgba(${wordHighlightBgColor}, ${reverseWordProgress})`;
-                } else {
-                  wordText.style.opacity = 1;
-                  word.style.backgroundColor = `rgba(${wordHighlightBgColor}, 0)`;
-                }
-              }
-            });
-          },
-        })
-      );
-    }
-
-    return () => {
-      triggers.forEach((trigger) => trigger.kill());
-    };
-  }, []);
-
-  useEffect(() => {
     const desk = deskSectionRef.current;
     const frame = deskFrameRef.current;
     const header = deskHeaderRef.current;
-    const items = deskItems
-      .map((item) => deskItemRefs.current[item.id])
-      .filter(Boolean);
+    const items = deskItems.flatMap((item) => {
+      const element = deskItemRefs.current[item.id];
+      return element ? [element] : [];
+    });
 
     if (!desk || !frame || !header || (!isMobileViewport && !items.length)) {
       return undefined;
@@ -525,46 +406,11 @@ const About = () => {
           </div>
         </section>
 
-        <section ref={animeSectionRef} className="anime-text-container">
-          <div className="about-spotlight-top-bar">
-            <div className="about-bar-content">
-              <div className="symbol">
-                <img src="/global/logo.png" alt="Logo" />
-              </div>
-              <div className="symbol">
-                <img src="/global/logo.png" alt="Logo" />
-              </div>
-            </div>
-          </div>
-
-          <div className="about-spotlight-bottom-bar">
-            <div className="about-bar-content">
-              <p className="primary sm">{aboutConfig.spotlightBottomBar[0]}</p>
-              <p className="primary sm">{aboutConfig.spotlightBottomBar[1]}</p>
-            </div>
-          </div>
-
-          <div className="copy-container">
-            <div className="anime-text">
-              {paragraphWords.map((paragraph, pIndex) => (
-                <p key={`paragraph-${pIndex}`}>
-                  {paragraph.map((wordData, wIndex) => (
-                    <span
-                      key={`word-${pIndex}-${wIndex}`}
-                      className={`word ${wordData.isKeyword ? "keyword-wrapper" : ""}`}
-                    >
-                      <span
-                        className={wordData.isKeyword ? `keyword ${wordData.normalizedWord}` : ""}
-                      >
-                        {wordData.word}
-                      </span>{" "}
-                    </span>
-                  ))}
-                </p>
-              ))}
-            </div>
-          </div>
-        </section>
+        <AboutSpotlight
+          paragraphs={aboutConfig.spotlightParagraphs}
+          keywords={aboutConfig.spotlightKeywords}
+          bottomBar={aboutConfig.spotlightBottomBar}
+        />
         <section className="about-outro">
           <div className="about-outro-inner">
             <h3>{aboutConfig.outroTitle}</h3>
