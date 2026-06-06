@@ -151,20 +151,22 @@ function App() {
       <div className={`app-shell ${isPreloaderComplete ? "ready" : ""}`}>
         <ScrollToTop />
         <NavBar key={pathname} />
-        <Suspense fallback={null}>
-          <Routes location={location} key={pathname}>
-            <Route
-              path="/"
-              element={<Home isPreloaderComplete={isPreloaderComplete} />}
-            />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/work" element={<Work />} />
-            <Route path="/sample-project" element={<Project />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+        {isPreloaderComplete && (
+          <Suspense fallback={null}>
+            <Routes location={location} key={pathname}>
+              <Route
+                path="/"
+                element={<Home isPreloaderComplete={isPreloaderComplete} />}
+              />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/work" element={<Work />} />
+              <Route path="/sample-project" element={<Project />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </Suspense>
+        )}
       </div>
     </>
   );

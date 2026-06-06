@@ -1,8 +1,14 @@
-import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./Home.css";
 
+import ContactForm from "../../components/ContactForm/ContactForm";
+import DotMatrix from "../../components/DotMatrix/DotMatrix";
+import MarqueeBanner from "../../components/MarqueeBanner/MarqueeBanner";
+import ProjectCarousel from "../../components/ProjectCarousel/ProjectCarousel";
 import RevealText from "../../components/RevealText/RevealText";
 import Reviews from "../../components/Reviews/Reviews";
+import SplitCardShowcase from "../../components/SplitCardShowcase/SplitCardShowcase";
+import TeamCards from "../../components/TeamCards/TeamCards";
 import Footer from "../../components/Footer/Footer";
 import TextReveal from "../../components/TextReveal/TextReveal";
 import BrandIcon from "../../components/BrandIcon/BrandIcon";
@@ -13,19 +19,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ReactLenis from "lenis/react";
 
 gsap.registerPlugin(ScrollTrigger);
-
-const DotMatrix = lazy(() => import("../../components/DotMatrix/DotMatrix"));
-const MarqueeBanner = lazy(() =>
-  import("../../components/MarqueeBanner/MarqueeBanner")
-);
-const SplitCardShowcase = lazy(() =>
-  import("../../components/SplitCardShowcase/SplitCardShowcase")
-);
-const TeamCards = lazy(() => import("../../components/TeamCards/TeamCards"));
-const ProjectCarousel = lazy(() =>
-  import("../../components/ProjectCarousel/ProjectCarousel")
-);
-const ContactForm = lazy(() => import("../../components/ContactForm/ContactForm"));
 
 let shouldPlayInitialMatrix;
 
@@ -165,17 +158,15 @@ const Home = ({ isPreloaderComplete = false }) => {
     <ReactLenis root>
       <div className="page home">
         <section className="hero">
-          <Suspense fallback={null}>
-            {isPreloaderComplete && (
-              <DotMatrix
-                color="#969992"
-                dotSize={2}
-                spacing={5}
-                opacity={0.9}
-                delay={isInitialLoad ? 2 : 0.5}
-              />
-            )}
-          </Suspense>
+          {isPreloaderComplete && (
+            <DotMatrix
+              color="#969992"
+              dotSize={2}
+              spacing={5}
+              opacity={0.9}
+              delay={isInitialLoad ? 2 : 0.5}
+            />
+          )}
 
           <div className="hero-center">
             <h1>{siteConfig.person.firstName}</h1>
@@ -216,18 +207,10 @@ const Home = ({ isPreloaderComplete = false }) => {
         </div>
       </section>
 
-      <Suspense fallback={null}>
         <MarqueeBanner />
-      </Suspense>
-      <Suspense fallback={null}>
         <SplitCardShowcase />
-      </Suspense>
-      <Suspense fallback={null}>
         <TeamCards />
-      </Suspense>
-      <Suspense fallback={null}>
         <ProjectCarousel />
-      </Suspense>
 
         <section className="hobbies">
           <div className="hobby">
@@ -252,9 +235,7 @@ const Home = ({ isPreloaderComplete = false }) => {
           </div>
         </section>
 
-        <Suspense fallback={null}>
-          <ContactForm />
-        </Suspense>
+        <ContactForm />
         <Footer />
       </div>
     </ReactLenis>
