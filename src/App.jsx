@@ -3,13 +3,13 @@ import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import {
   Suspense,
   lazy,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
   useState,
 } from "react";
-import { preloadAllRoutes, routeLoaders } from "./utils/routePreload";
-import { preloadImages, aboutDeskImageSources } from "./utils/preloadAssets";
+import { routeLoaders } from "./utils/routePreload";
 
 import NavBar from "./components/NavBar/NavBar";
 import Preloader from "./components/Preloader/Preloader";
@@ -56,7 +56,9 @@ function ScrollToTop() {
 function App() {
   const location = useLocation();
   const { pathname } = location;
-  const [isPreloaderComplete, setIsPreloaderComplete] = useState(false);
+  const [isPreloaderComplete, setIsPreloaderComplete] = useState(() =>
+    window.matchMedia("(max-width: 999px)").matches
+  );
   const preloaderRef = useRef(null);
 
   useEffect(() => {
@@ -64,18 +66,7 @@ function App() {
 
     const preloadCriticalAssets = async () => {
       const currentPathLoader = routeLoaders[pathname];
-      const routePromises = [routeLoaders["/"]?.()];
-
-      if (currentPathLoader && pathname !== "/") {
-        routePromises.push(currentPathLoader());
-      }
-
-      const preloadTasks = [
-        Promise.allSettled(routePromises.filter(Boolean)),
-        preloadImages(aboutDeskImageSources, 5000),
-      ];
-
-      await Promise.allSettled(preloadTasks);
+      await Promise.allSettled(currentPathLoader ? [currentPathLoader()] : []);
 
       if (isMounted) {
         preloaderRef.current?.startExit();
@@ -108,37 +99,9 @@ function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!isPreloaderComplete) {
-      return;
-    }
-
-    let idleId;
-    let timeoutId;
-
-    const warmRoutes = () => {
-      preloadAllRoutes();
-    };
-
-    if ("requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(warmRoutes, { timeout: 1500 });
-    } else {
-      timeoutId = window.setTimeout(warmRoutes, 400);
-    }
-
-    return () => {
-      if (idleId) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
-    };
-  }, [isPreloaderComplete]);
-
-  const handlePreloaderComplete = () => {
+  const handlePreloaderComplete = useCallback(() => {
     setIsPreloaderComplete(true);
-  };
+  }, []);
 
   return (
     <>
@@ -151,7 +114,7 @@ function App() {
       <div className={`app-shell ${isPreloaderComplete ? "ready" : ""}`}>
         <ScrollToTop />
         <NavBar key={pathname} />
-        {isPreloaderComplete && (
+        <main id="main-content">
           <Suspense fallback={null}>
             <Routes location={location} key={pathname}>
               <Route
@@ -166,7 +129,7 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Suspense>
-        )}
+        </main>
       </div>
     </>
   );

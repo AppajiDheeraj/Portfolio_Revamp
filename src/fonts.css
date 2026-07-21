@@ -1,6 +1,6 @@
 @font-face {
   font-family: "Rader";
-  src: url("/fonts/rader/PPRader-Bold.ttf") format("truetype");
+  src: url("/fonts/rader/PPRader-Bold.woff2") format("woff2");
   font-weight: bold;
   font-style: normal;
   font-display: swap;
@@ -40,7 +40,7 @@
 
 @font-face {
   font-family: "Rader";
-  src: url("/fonts/rader/PPRader-Medium.ttf") format("truetype");
+  src: url("/fonts/rader/PPRader-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;

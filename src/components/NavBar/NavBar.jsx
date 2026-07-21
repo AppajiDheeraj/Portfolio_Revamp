@@ -277,6 +277,9 @@ const NavBar = () => {
             <img
               src="/global/logo.png"
               alt="Logo"
+              width="833"
+              height="866"
+              decoding="async"
               className={isOpen ? "rotated" : ""}
             />
           </Link>
