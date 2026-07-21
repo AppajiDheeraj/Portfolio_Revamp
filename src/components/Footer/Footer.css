@@ -57,10 +57,15 @@
   align-items: flex-end;
 }
 
-.footer-header h1 {
+.footer-brand-line {
   position: relative;
   left: -0.5vw;
+  font-family: "Rader";
   font-size: 13vw;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .footer-copyright-line {

@@ -100,7 +100,7 @@
   bottom: 0;
 }
 
-.marquee-banner .banner .banner-content h4 {
+.marquee-banner .banner .banner-content h3 {
   color: #ffffff;
   font-size: 1.5em;
   font-weight: 600;
@@ -127,6 +127,14 @@
   z-index: 3;
 }
 
+.marquee-banner .banner .banner-logo p {
+  font-family: "Rader";
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  text-transform: uppercase;
+}
+
 @media (max-width: 1000px) {
   .marquee-banner .banner {
     width: calc(100% - 1rem);
@@ -139,7 +147,7 @@
 }
 
 @media (min-width: 2000px) {
-  .marquee-banner .marquees h1 {
+  .marquee-banner .marquees h2 {
     font-size: 8vw;
   }
 

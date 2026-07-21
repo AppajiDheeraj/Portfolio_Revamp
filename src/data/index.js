@@ -136,7 +136,8 @@ export const siteConfig = {
     headlineSecondary: "Designing intelligent digital experiences",
     bannerCopy: "Crafting systems that feels alive",
     bannerLogo: `[ ${person.firstName}.exe ]`,
-    bannerImage: "/marquee-banner/marquee_banner_01.png",
+    bannerImage: "/marquee-banner/marquee_banner_01.webp",
+    bannerImageSmall: "/marquee-banner/marquee_banner_01-720.webp",
   },
   clubs: {
     title: "Clubs",

@@ -41,23 +41,32 @@ const MarqueeBanner = () => {
     <section className="marquee-banner" ref={marqueeBannerRef}>
       <div className="marquees">
         <div className="marquee-header marquee-header-1" ref={marquee1Ref}>
-          <h1>{marquee.headlinePrimary}</h1>
+          <h2>{marquee.headlinePrimary}</h2>
         </div>
         <div className="marquee-header marquee-header-2" ref={marquee2Ref}>
-          <h1>{marquee.headlineSecondary}</h1>
+          <h2>{marquee.headlineSecondary}</h2>
         </div>
       </div>
       <div className="banner">
         <div className="banner-content">
           <TextReveal>
-            <h4>{marquee.bannerCopy}</h4>
+            <h3>{marquee.bannerCopy}</h3>
           </TextReveal>
         </div>
         <div className="banner-img">
-          <img src={marquee.bannerImage} alt="" />
+          <img
+            src={marquee.bannerImage}
+            srcSet={`${marquee.bannerImageSmall} 720w, ${marquee.bannerImage} 1200w`}
+            sizes="(max-width: 1000px) calc(100vw - 3rem), min(35vw, 600px)"
+            alt=""
+            width="1200"
+            height="1447"
+            loading="lazy"
+            decoding="async"
+          />
         </div>
         <div className="banner-logo">
-          <h5>{marquee.bannerLogo}</h5>
+          <p>{marquee.bannerLogo}</p>
         </div>
       </div>
     </section>

@@ -20,7 +20,7 @@
   will-change: transform;
 }
 
-.sticky-header h1 {
+.sticky-header h2 {
   margin: 0;
   color: var(--base-400, var(--fg));
   font-size: 28vw;
@@ -42,11 +42,11 @@
 }
 
 #card-1 {
-  background-color: #4e7da5;
+  background-color: #477398;
 }
 
 #card-2 {
-  background-color: #9b6587;
+  background-color: #8f5b7c;
 }
 
 #card-3 {
@@ -96,7 +96,7 @@
   font-size: 0.85rem !important;
   font-weight: 600 !important;
   line-height: 1.2 !important;
-  opacity: 0.9;
+  opacity: 1;
   letter-spacing: 0.01em;
 }
 
@@ -110,7 +110,7 @@
   padding: 1rem;
 }
 
-.card-content h2 {
+.card-content h3 {
   font-size: 2.5rem;
   letter-spacing: -0.05rem;
   line-height: 1;
@@ -152,7 +152,7 @@
     margin-bottom: 0.5rem;
   }
 
-  .mobile-header h1 {
+  .mobile-header h2 {
     margin: 0 0 0.5rem 0;
     color: var(--base-400, var(--fg));
     font-size: 2.25rem;

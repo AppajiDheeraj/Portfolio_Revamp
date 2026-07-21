@@ -59,8 +59,8 @@ const Footer = () => {
       </div>
       <div className="footer-row">
         <div className="footer-header">
-          <h1>{footer.brandLine1}</h1>
-          <h1>{footer.brandLine2}</h1>
+          <p className="footer-brand-line">{footer.brandLine1}</p>
+          <p className="footer-brand-line">{footer.brandLine2}</p>
         </div>
 
         <div className="footer-copyright-line">

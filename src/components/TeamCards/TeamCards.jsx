@@ -196,7 +196,7 @@ export default function TeamCards() {
     <>
       <section className="sticky team-desktop" ref={stickyRef}>
         <div className="sticky-header" ref={headerRef}>
-          <h1>{clubs.title}</h1>
+          <h2>{clubs.title}</h2>
         </div>
         {teamMembers.map((m, idx) => (
           <div
@@ -207,12 +207,12 @@ export default function TeamCards() {
           >
             <a href={m.instagram} target="_blank" rel="noopener noreferrer" className="card-img-link">
               <div className="card-img">
-                <img src={m.img} alt={m.alt} />
+                <img src={m.img} alt={m.alt} loading="lazy" decoding="async" />
               </div>
             </a>
             <div className="card-content">
               <div className="card-title">
-                <h2>{m.name}</h2>
+                <h3>{m.name}</h3>
                 {m.position && <p className="card-position">{m.position}</p>}
               </div>
               <div className="card-description">
@@ -225,18 +225,18 @@ export default function TeamCards() {
 
       <section className="team-mobile">
         <div className="mobile-header">
-          <h1>{clubs.title}</h1>
+          <h2>{clubs.title}</h2>
         </div>
         {teamMembers.map((m) => (
           <div className="team-card" id={m.id} key={`m-${m.id}`}>
             <a href={m.instagram} target="_blank" rel="noopener noreferrer" className="card-img-link">
               <div className="card-img">
-                <img src={m.img} alt={m.alt} />
+                <img src={m.img} alt={m.alt} loading="lazy" decoding="async" />
               </div>
             </a>
             <div className="card-content">
               <div className="card-title">
-                <h2>{m.name}</h2>
+                <h3>{m.name}</h3>
                 {m.position && <p className="card-position">{m.position}</p>}
               </div>
               <div className="card-description">

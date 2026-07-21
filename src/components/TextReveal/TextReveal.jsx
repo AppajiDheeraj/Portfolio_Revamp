@@ -33,6 +33,11 @@ export default function TextReveal({
   const containerRef = useRef(null);
   const elementRefs = useRef([]);
   const splitRefs = useRef([]);
+  const singleChild =
+    React.Children.count(children) === 1 && React.isValidElement(children)
+      ? children
+      : null;
+  const isParagraph = singleChild?.type === "p";
 
   useGSAP(
     () => {
@@ -63,6 +68,7 @@ export default function TextReveal({
               mask: "lines",
               linesClass: "line",
               lineThreshold: 0.1,
+              aria: isParagraph ? "none" : "auto",
             });
 
             splitRefs.current.push(split);
@@ -108,6 +114,7 @@ export default function TextReveal({
 
             const split = SplitText.create(element, {
               type: "words,chars",
+              aria: isParagraph ? "none" : "auto",
             });
 
             splitRefs.current.push(split);
@@ -150,11 +157,26 @@ export default function TextReveal({
         });
       };
     },
-    { scope: containerRef, dependencies: [animateOnScroll, delay, type] }
+    {
+      scope: containerRef,
+      dependencies: [animateOnScroll, delay, type, isParagraph],
+    }
   );
 
-  if (React.Children.count(children) === 1) {
-    return React.cloneElement(children, { ref: containerRef });
+  if (singleChild) {
+    if (isParagraph) {
+      return (
+        <>
+          <span className="sr-only">{singleChild.props.children}</span>
+          {React.cloneElement(singleChild, {
+            ref: containerRef,
+            "aria-hidden": "true",
+          })}
+        </>
+      );
+    }
+
+    return React.cloneElement(singleChild, { ref: containerRef });
   }
 
   return (

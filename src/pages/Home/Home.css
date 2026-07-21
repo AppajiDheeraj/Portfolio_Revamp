@@ -278,7 +278,7 @@
   margin-bottom: 3em;
 }
 
-.page.home .about-copy p {
+.page.home .about-copy h2 {
   font-size: 1.2em;
   line-height: 1.6;
   color: #ffffff;
@@ -342,7 +342,7 @@
     font-size: 1.8em;
   }
 
-  .page.home .about-copy p {
+  .page.home .about-copy h2 {
     font-size: 1em;
   }
 

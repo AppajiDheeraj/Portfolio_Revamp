@@ -1,0 +1,21 @@
+# Appaji Dheeraj Portfolio
+
+Appaji Dheeraj is a computer science student, product builder, full-stack developer, and systems and AI builder. This site presents his background, selected work, and contact information.
+
+## Primary pages
+
+- [Homepage](https://dheerajbuilds.com/)
+- [About Appaji Dheeraj](https://dheerajbuilds.com/about)
+- [Selected work](https://dheerajbuilds.com/work)
+- [Contact](https://dheerajbuilds.com/contact)
+- [Frequently asked questions](https://dheerajbuilds.com/faq)
+
+## Profiles
+
+- [GitHub](https://github.com/AppajiDheeraj)
+- [LinkedIn](https://www.linkedin.com/in/appaji-dheeraj/)
+
+## Crawling
+
+- [Sitemap](https://dheerajbuilds.com/sitemap.xml)
+- [Robots rules](https://dheerajbuilds.com/robots.txt)

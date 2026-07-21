@@ -92,16 +92,16 @@ const Preloader = ({ onAnimationComplete, ref }) => {
       let exitTimeline;
 
       try {
-        logoSplit = SplitText.create(".preloader-logo h1", {
+        logoSplit = SplitText.create(".preloader-logo p", {
           type: "chars",
           charsClass: "char",
           mask: "chars",
         });
 
         gsap.set(logoSplit.chars, { x: "110%" });
-        gsap.set(".preloader-logo h1", { opacity: 1 });
+        gsap.set(".preloader-logo p", { opacity: 1 });
 
-        function animateProgress(duration = 1.15) {
+        function animateProgress(duration = 0.55) {
           const tl = gsap.timeline();
           // Keep progress timing centralized so visual pacing can be tuned in one place.
           tl.to(".preloader-progress-bar", {
@@ -132,15 +132,15 @@ const Preloader = ({ onAnimationComplete, ref }) => {
           exitTimeline
             .to(".preloader-logo .char", {
               x: "-110%",
-              stagger: 0.035,
-              duration: 0.9,
+              stagger: 0.015,
+              duration: 0.35,
               ease: "power3.inOut",
             })
             .to(
               ".preloader-progress",
               {
                 opacity: 0,
-                duration: 0.7,
+                duration: 0.35,
                 ease: "sine.out",
               },
               "-=0.4"
@@ -149,7 +149,7 @@ const Preloader = ({ onAnimationComplete, ref }) => {
               ".preloader-mask",
               {
                 scale: maskScale,
-                duration: 0.7,
+                duration: 0.4,
                 ease: "expo.inOut",
               },
               "<"
@@ -169,7 +169,7 @@ const Preloader = ({ onAnimationComplete, ref }) => {
         };
 
         introTimeline = gsap.timeline({
-          delay: 0.1,
+          delay: 0,
           onComplete: () => {
             introCompleteRef.current = true;
             startExit();
@@ -178,9 +178,9 @@ const Preloader = ({ onAnimationComplete, ref }) => {
 
         introTimeline.to(logoSplit.chars, {
           x: "0%",
-          stagger: 0.04,
+          stagger: 0.02,
           ease: "expo.out",
-          duration: 0.9,
+          duration: 0.45,
         }).add(animateProgress(), "<");
 
         return () => {
@@ -202,7 +202,7 @@ const Preloader = ({ onAnimationComplete, ref }) => {
       <div className="preloader-progress">
         <div className="preloader-progress-bar"></div>
         <div className="preloader-logo">
-          <h1>Appaji</h1>
+          <p>Appaji</p>
         </div>
       </div>
       <div className="preloader-mask"></div>
