@@ -34,6 +34,10 @@
   line-height: 1;
 }
 
+.hero-center h1 span {
+  display: block;
+}
+
 .hero-footer {
   position: relative;
   width: 100%;

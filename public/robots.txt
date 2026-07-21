@@ -1,10 +1,12 @@
-# Allow all search engine bots to crawl the portfolio
 User-agent: *
 Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /login/
+Disallow: /signin/
+Disallow: /signup/
+Disallow: /account/
 
-# Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
-
-# Crawl-delay and request-rate (optional, adjust based on server capacity)
-# Crawl-delay: 1
-# Request-rate: 30/1m
+Sitemap: https://dheerajbuilds.com/sitemap.xml

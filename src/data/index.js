@@ -11,9 +11,9 @@ export const siteConfig = {
   person,
   seo: {
     siteUrl,
-    title: "Portfolio of Appaji Dheeraj",
+    title: "Appaji Dheeraj — Product, Full-Stack, Systems & AI Builder",
     description:
-      "Portfolio of Appaji Dheeraj - full-stack engineer building AI-first products, systems, and polished web experiences.",
+      "Appaji Dheeraj is a computer science student, product builder, full-stack developer, and systems and AI builder creating practical, production-ready software.",
     icon: `${siteUrl}/global/Site_Icon.svg`,
     shareImage: `${siteUrl}/screenshots/Thumbnail.png`,
   },

@@ -169,8 +169,10 @@ const Home = ({ isPreloaderComplete = false }) => {
           )}
 
           <div className="hero-center">
-            <h1>{siteConfig.person.firstName}</h1>
-            <h1>{siteConfig.person.lastName}</h1>
+            <h1>
+              <span>{siteConfig.person.firstName}</span>
+              <span>{siteConfig.person.lastName}</span>
+            </h1>
           </div>
 
           <div className="hero-footer">
