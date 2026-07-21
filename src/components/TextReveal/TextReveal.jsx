@@ -62,13 +62,14 @@ export default function TextReveal({
 
           elements.forEach((element) => {
             elementRefs.current.push(element);
+            const isElementParagraph = element.tagName.toLowerCase() === "p";
 
             const split = SplitText.create(element, {
               type: "lines",
               mask: "lines",
               linesClass: "line",
               lineThreshold: 0.1,
-              aria: isParagraph ? "none" : "auto",
+              aria: isElementParagraph ? "none" : "auto",
             });
 
             splitRefs.current.push(split);
@@ -111,10 +112,11 @@ export default function TextReveal({
 
           elements.forEach((element) => {
             elementRefs.current.push(element);
+            const isElementParagraph = element.tagName.toLowerCase() === "p";
 
             const split = SplitText.create(element, {
               type: "words,chars",
-              aria: isParagraph ? "none" : "auto",
+              aria: isElementParagraph ? "none" : "auto",
             });
 
             splitRefs.current.push(split);

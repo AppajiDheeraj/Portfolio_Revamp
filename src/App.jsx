@@ -3,6 +3,7 @@ import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import {
   Suspense,
   lazy,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -98,9 +99,9 @@ function App() {
     };
   }, []);
 
-  const handlePreloaderComplete = () => {
+  const handlePreloaderComplete = useCallback(() => {
     setIsPreloaderComplete(true);
-  };
+  }, []);
 
   return (
     <>
